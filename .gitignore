@@ -1,2 +1,4 @@
-.vcf
-.DS_Store
+*.vcf
+*.DS_Store
+*.csv
+*.gz
