@@ -1,5 +1,5 @@
-Okay, I can create a "conceptual graph" or a structured outline in text format to help you understand the relationships between the provided literature and the core research areas that form the foundation for a system like Emedgene.
-Think of this as a hierarchical map:
+### By Google  Gemini - Foundation Research Emedgene 
+
 **Central Hub: AI-Driven Genomic Variant Interpretation (e.g., Emedgene)**
     |
     |--- This relies on integrating insights and techniques from several key research pillars:
@@ -61,7 +61,7 @@ Think of this as a hierarchical map:
               |   ├── Lit: Singleton et al. (2013) - Highlights complexity and importance of phenotyping.
               |   └── Lit: Smedley et al. (2015) - Exomiser: A key tool that integrates phenotype data for variant prioritization.
 
-**How the Pillars Connect to Build a System like Emedgene:**
+**How Pillars Connect to Build a System like Emedgene:**
 
 1.  **Data Foundation:**
     * **NLP (Pillar 2)** processes vast amounts of literature.
@@ -79,14 +79,3 @@ Think of this as a hierarchical map:
 4.  **Clinical Trust & Utility:**
     * **Explainable AI (Pillar 4)** methods are applied to make the ML model's outputs understandable and trustworthy for clinicians.
     * The system aims to provide evidence and reasoning that aligns with established clinical frameworks like the **ACMG/AMP guidelines (Pillar 1D)**.
-
-**To "Read" This Graph for Understanding the Literature:**
-
-* Start from the "Central Hub" to see the overall goal.
-* Explore each "Pillar" to understand a major research domain.
-* Within each pillar, the sub-points (A, B, C...) break down the domain into more specific problems or technological advancements.
-* The "Lit:" entries point to specific papers that are examples or foundational works for that sub-point. Briefly read the description to see its contribution.
-* Finally, review the "How the Pillars Connect" section to see how these seemingly distinct research areas are synthesized in a comprehensive variant interpretation tool.
-
-This structure should help you navigate the different research thrusts and see how they contribute to the complex task of interpreting genomic variants with AI.
-

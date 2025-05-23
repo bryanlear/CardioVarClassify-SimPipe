@@ -1,1 +1,1 @@
-# dummypipeline
+# dummy bioinformatics pipeline for practice
