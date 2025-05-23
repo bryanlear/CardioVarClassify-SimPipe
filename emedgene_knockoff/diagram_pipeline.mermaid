@@ -1,40 +1,40 @@
 graph LR
-    A[Raw Sequencing Data (e.g., FASTQ/BAM)] --> B{Secondary Analysis};
-    C[Patient Phenotype Information (e.g., HPO terms, clinical notes)] --> D{Data Integration & Preprocessing};
+    A[Raw Sequencing Data] --> B{Secondary Analysis}
+    C[Patient Phenotype Information] --> D{Data Integration & Preprocessing}
 
-    subgraph Secondary Analysis
-        B1[Alignment to Reference Genome (e.g., GRCh38)]
-        B2[Variant Calling (SNVs, Indels, CNVs, SVs)]
-        B3[Quality Control (QC) of Variants]
-        B --> B1 --> B2 --> B3;
+    subgraph Secondary_Analysis
+        B1[Alignment to Reference Genome]
+        B2[Variant Calling]
+        B3[Quality Control of Variants]
+        B --> B1 --> B2 --> B3
     end
 
-    B3 --> E{Tertiary Analysis - Core AI Interpretation Engine};
-    D --> E;
+    B3 --> E{Tertiary Analysis}
+    D --> E
 
-    subgraph Tertiary Analysis - Core AI Interpretation Engine
-        E1[Variant Annotation (Gene context, functional impact, population frequencies, conservation scores, etc.)]
-        E2[Knowledge Base Integration (ClinVar, OMIM, gnomAD, PubMed, internal curated data, etc.)]
-        E3[Phenotype Data Processing & Feature Extraction (NLP on clinical notes, HPO term mapping)]
-        E4[AI/Machine Learning Models for Pathogenicity Prediction & Prioritization]
-        E5[Evidence Aggregation & Scoring (ACMG/AMP-like framework, custom rules)]
-        E6[Explainable AI (XAI) Layer (Providing reasons for predictions)]
-        E7[Variant Filtering & Prioritization Engine (User-defined filters, AI ranking)]
+    subgraph Tertiary_Analysis
+        E1[Variant Annotation]
+        E2[Knowledge Base Integration]
+        E3[Phenotype Data Processing & Feature Extraction]
+        E4[AI/Machine Learning Models for Pathogenicity Prediction]
+        E5[Evidence Aggregation & Scoring]
+        E6[Explainable AI Layer]
+        E7[Variant Filtering & Prioritization Engine]
 
-        E --> E1;
-        E --> E2;
-        E --> E3;
-        E1 --> E4;
-        E2 --> E4;
-        E3 --> E4;
-        E4 --> E5;
-        E5 --> E7;
-        E4 --> E6;
-        E6 --> F[Clinical Review & Interpretation Interface];
-        E7 --> F;
+        E --> E1
+        E --> E2
+        E --> E3
+        E1 --> E4
+        E2 --> E4
+        E3 --> E4
+        E4 --> E5
+        E5 --> E7
+        E4 --> E6
+        E6 --> F[Clinical Review & Interpretation Interface]
+        E7 --> F
     end
 
-    F --> G[Final Report Generation (Classified variants, supporting evidence, potential diagnoses)];
+    F --> G[Final Report Generation]
 
     style A fill:#f9f,stroke:#333,stroke-width:2px
     style C fill:#f9f,stroke:#333,stroke-width:2px
