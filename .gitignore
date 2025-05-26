@@ -2,7 +2,7 @@
 *.DS_Store
 *.csv
 *.gz
-
+*.pdf
 *.manifest
 *.spec
 
