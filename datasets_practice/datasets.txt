@@ -1,0 +1,10 @@
+https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE225336
+''Myocardial interstitial fibrosis is a common pathological feature in many cardiovascular diseases, including heart failure and atrial fibrillation''
+
+
+GSE225336 contains RNA-seq and ATAC-seq from primary human cardiac fibroblasts treated with / without TGFBETA1 (important mediator of fibrosis)
+
+
+RNA-seq for gene expression changes --------------------|
+                                                           * how variants may operate 
+ATAC-seq for changes in chromatin accessibility(?) -----|
