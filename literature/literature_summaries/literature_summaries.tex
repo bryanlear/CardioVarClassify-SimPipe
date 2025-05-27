@@ -1,0 +1,157 @@
+\documentclass[twocolumn]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage[most]{tcolorbox}
+\usepackage{xcolor}
+\usepackage{natbib}
+\usepackage{siunitx}
+% \usepackage{ragged2e} % Not strictly needed for this, uncomment if justifying is required elsewhere
+
+% Define a new tcolorbox environment for literature papers
+% Changed to take 1 mandatory argument for the title.
+% LaTeX labels (\label{}) should be placed *inside* the environment where needed.
+\newtcolorbox{literaturepaper}[1]{ % #1 is for the title
+    enhanced,
+    breakable,
+    colback=gray!5,
+    colframe=black!20,
+    boxsep=5pt,
+    arc=4pt,
+    title={#1}, % Title is now the first (and only) mandatory argument
+    fonttitle=\bfseries,
+    coltitle=blue!70!black,
+    span=all, % Makes the box span all columns
+    parbox=false, % Ensure paragraphs break correctly within the box
+    % growboxset, % Not a standard key, usually tcolorbox handles height automatically with breakable.
+               % If you meant something specific, please clarify. Otherwise, it's often not needed.
+    before skip=1em,
+    after skip=1em,
+    left skip=0pt, % These affect the box's position relative to page margins if not spanning all
+    right skip=0pt
+    % Optional tcolorbox options can be passed directly in \begin{literaturepaper}[<options>]
+}
+
+% A new tcolorbox for small highlighted blocks (not truly inline within text)
+\newtcolorbox{smallhighlightbox}[1][]{ % Renamed for clarity if not inline math
+    enhanced,
+    colback=blue!5!white,
+    colframe=blue!20!white,
+    boxsep=2pt,
+    arc=2pt,
+    boxrule=0.5pt,
+    % nohandinout, % Deprecated/not a standard tcolorbox key. Small boxes are usually unbreakable.
+    #1
+}
+% If you need a box for truly *inline* math like $ \tcboxmath{E=mc^2} $, use \newtcbox:
+% \newtcbox{\inlinehighlight}{nobeforeafter, math upper, tcbox raise base,
+%   enhanced, colback=blue!5!white, colframe=blue!20!white, boxrule=0.5pt, arc=2pt, boxsep=1pt}
+
+
+\bibliographystyle{plainnat} % Or another style like abbrvnat, unsrtnat
+
+\begin{document}
+
+\section*{Literature Summaries}
+\vspace{0em} % Adjust vertical spacing as needed
+    \large\textit{Summaries compiled by \textbf{Bryan L.A.}, Amsterdam, NL. 2025.} % Year not in math mode
+\vspace{1em} % Added some space before the first box
+
+% First literature summary box
+% Usage: \begin{literaturepaper}{The Title with citation} \label{your-label}
+\begin{literaturepaper}{Bayesian Graphical Models for Integrating Multiplatform Genomics Data \cite{Wang_Baladandayuthapani_Holmes_Do_2013}}
+\label{paper-summary-1} % LaTeX label for cross-referencing this box
+\small
+    \textbf{Aim:} Graphical model frameworks to integrate multiplatform genomic data (gene expression and microRNA expression) with clinical data (patient survival) to identify and characterize meaningful biological relationships. Model selection problem: For each triplet, select best-fitting graph from $K_i$ (determine type of dependence structure). Focus on identifying mRNA and genes whose relationship align with biologically plausible processes.
+
+    \textbf{G} = Gene expression, \textbf{M} = MicroRNA expression, \textbf{C} = Clinical outcome
+    
+    \begin{itemize}[label=$\circ$]
+        \item Undirected graphs where each node is either $G, M, C$.
+        \item Let $V = \{G,M,C\}$ be set of nodes (variables) in graphs.
+        \item Each of the 8 models represented as undirected graphs $K_i$ (for $i = 0,...,7$).
+        \item $K_i = (V, E_i)$, where an edge $(u, v) \in E_i$ signifies Conditional Dependence (direct statistical association) between $u$ and $v$.
+        \item Absence of $(u, v)$ means nodes are conditionally independent given a 3rd variable.
+    \end{itemize}
+
+    \textbf{Statistical framework:} Bayesian model selection approach for Gaussian graphical models (GGMs) to select most appropriate $K_i$ for each $V$. Bayesian GGM has closed-form expression $\to$ reduced computational time/cost.
+
+    Whereas molecular features at DNA level only modulate mRNA expression of corresponding (nearby) genes, microRNA can regulate mRNA expression of any genes regardless of locus (also multiple target capability). Relationship between microRNA and targets depends ONLY on inherent features (such as sequence and structure of microRNA).
+
+    \textbf{GGM:} For measuring dependency structure for multivariate normal distributions.
+
+    Let $X = (x_1,...,x_p)'$ be a $p$-dimensional normal random vector with mean $\mu$ and covariance matrix $\Sigma$. (Note: $x_i$ was used in the original, but often $x_1$ is the first component, so I've kept $x_1$).
+    Each observation $x \sim N(0, \Sigma)$, with unknown $\Sigma$.
+    
+    \textbf{\textit{Inverse covariance matrix}} (Precision matrix/Concentration matrix) $\Omega = \Sigma^{-1}$ reveals \textbf{\textit{conditional dependence structure}}. $\Omega$ has elements $\omega_{ij}$.
+    $\omega_{ij} = 0$ (for $i \neq j$) \textbf{if and only if variables $x_i$ and $x_j$ are conditionally independent given all other variables in the set}.
+    Partial correlation: $\rho_{ij \cdot \text{rest}} = -\omega_{ij} / \sqrt{\omega_{ii}\omega_{jj}}$.
+
+    When \textbf{off-diagonal elements} $\omega_{ij} = 0$ (for $i \neq j$), this implies NO EDGE, meaning no direct relationship (after accounting for the influence of all other variables $X_{V \setminus \{i,j\}}$).
+
+    Partial correlation thus measures \textit{direct linear association} between 2 variables AFTER adjusting/removing for linear effects of all other variables in the model, helping to distinguish \textbf{direct} from \textbf{indirect} relationships.
+
+    \textbf{Conditional variance of $x_i$:} is $1/\omega_{ii}$ (assuming $\Omega$ is the precision matrix of the conditional distribution). Increasing $\omega_{ii}$ means decreasing conditional variance (higher precision).
+
+    \textbf{Multivariate Normal Density Function:} $\Omega$ appears in the exponent:
+    \[f(X) \propto \exp\left(-\frac{1}{2}(X-\mu)'\Omega(X-\mu)\right)\]
+    The term $(X-\mu)'\Omega(X-\mu)$ is a quadratic form defining the \textbf{Mahalanobis distance} (\textit{measures distance between a point and a distribution, accounting for covariance}). Here, $\Omega$ determines the shape of the distribution.
+
+    \textbf{Geometrical meaning:} Surfaces of constant probability density are \textit{ellipsoids} (isoprobability contours). Their shape, orientation, and tightness are determined by $\Sigma$ (and thus $\Omega$).
+
+    $\Omega$ is \textbf{diagonal} $\rightarrow$ all \textbf{off-diagonal elements} $\omega_{ij} = 0$ (for $i \neq j$), while \textbf{diagonal elements} $\omega_{ii}$ can be non-zero.
+
+    \textbf{Decomposable Graph:} $G = (V,E)$ if either G is complete or $V = A \cup S \cup B$, where $S$ is \textbf{complete} and separates $A$ and $B$, and both $A \cup S$ and $B \cup S$ are decomposable graphs. (All 8 models in the chapter are stated to be decomposable).
+
+    Posterior probability of graph $G$:
+    \[p(G|X) \propto p(G) \int p(X|\Sigma, G) p(\Sigma|G) d\Sigma,\]
+    where $p(G)$ is the prior for graph $G$, and $p(\Sigma|G)$ is the prior for covariance matrix $\Sigma$ given $G$.
+
+    \textbf{Prior Choice:} The integral is sensitive to the choice of prior $p(\Sigma|G)$.
+    \textbf{Hyper-inverse Wishart (HIW) distribution:} A conjugate prior, $p(\Sigma|G) \sim HIW_G(b, D)$, where $b$ is for degrees of freedom and $D$ is a scale matrix.
+    
+    \textbf{Fractional Bayes Factors:} Used when prior information is weak. Notionally uses a small fraction $(g)$ of the data (likelihood) to "train" a noninformative prior into a proper one.
+    The HIW g-prior, $p(\Sigma|G) \sim \text{HIW}_G(g \cdot n, gX'X)$, corresponds to this fractional Bayes factor approach, addressing the "double use of data" concern from $X'X$ in the prior.
+
+    \textbf{Bayes Factor $BF(G_0 : G_i)$ for comparing null graph $G_0$ (no edges) to an alternative $G_i$:}
+    (Your transcribed formula. Note: The terms involving products over $\mathcal{S}$ and $\mathcal{C}$ appear identically in your numerator and denominator, which would lead to cancellation. Please double-check the original formula if this was not intended. The formula from the provided image `4.pdf` is different. Below is the LaTeX for *your transcribed version*, made typographically clearer.)
+
+    Let the Bayes Factor be $BF(G_0 : G_i) = M \times F_i$, where $F_i$ is the main fraction:
+    \[ F_i = \frac{\prod_{j=1}^p \left|\frac{1}{2}X_j'X_j\right|^{\frac{n}{2}} \prod_{C \in \mathcal{C}} \left|\frac{1}{2}X_C'X_C\right|^{\frac{|C|}{2}}\prod_{S \in \mathcal{S}} \left|\frac{1}{2}X_S'X_S\right|^{\frac{|S|}{2}}}{\prod_{j=1}^p \left|\frac{1}{2n}X_j'X_j\right|^{\frac{1}{2}} \prod_{S \in \mathcal{S}} \left|\frac{1}{2}X_S'X_S\right|^{\frac{|S|}{2}} \prod_{C \in \mathcal{C}} \left|\frac{1}{2}X_C'X_C\right|^{\frac{|C|}{2}}} \]
+    And $M$ is:
+    \[ M = \frac{\prod_{C \in \mathcal{C}} \Gamma\left(\frac{n+|C|-1}{2}\right) \prod_{S \in \mathcal{S}} \Gamma\left(\frac{|S|}{2}\right)}{\prod_{S \in \mathcal{S}} \Gamma\left(\frac{n+|S|-1}{2}\right)\prod_{C \in \mathcal{C}} \Gamma\left(\frac{|C|}{2}\right)} \]
+    (\textit{Note on your formula transcription for $F_i$: The product terms over cliques $\mathcal{C}$ and separators $\mathcal{S}$ are identical in your numerator and denominator and would cancel out. Please verify if this is the intended formula. The formula in `4.pdf` (Equation 14.2) for the main fractional part is different.})
+
+    \textbf{Example of $\Omega$ matrices:}
+    General $\Omega$:
+    \[ \Omega = \begin{pmatrix} \omega_{11} & \omega_{12} & \omega_{13} \\ \omega_{21} & \omega_{22} & \omega_{23} \\ \omega_{31} & \omega_{32} & \omega_{33} \end{pmatrix} \]
+    Diagonal $\Omega$:
+    \[ \Omega_{\text{diagonal}} = \begin{pmatrix} \omega_{11} & 0 & 0 \\ 0 & \omega_{22} & 0 \\ 0 & 0 & \omega_{33} \end{pmatrix} \]
+
+    \textbf{Preprocessing step for clinical outcome C (in GGM context):} Use Cox model and Breslow estimator to handle censored survival data and derive a transformed (e.g., imputed, log-transformed) clinical outcome variable 'C' suitable for the GGM framework.
+    
+\end{literaturepaper}
+
+% Second literature summary box
+\begin{literaturepaper}{Another paper with a short title \cite{AnotherPaper2020}}
+\label{paper-summary-2}
+    \textbf{Aim:} To develop and validate machine learning models for predicting recurrence in Glioblastoma patients based on integrated genomic and clinical data.
+
+    \textbf{Key Findings:}
+    \begin{itemize}
+        \item A random forest classifier achieved high accuracy (AUC = 0.85) in predicting early recurrence.
+        \item Identified key features including IDH mutation status, MGMT promoter methylation, and specific gene expression signatures (G4, G5) as strong predictors.
+    \end{itemize}
+
+    \textbf{Methods:}
+    \begin{itemize}
+        \item Integrated multi-omics data (genomic, transcriptomic, clinical) from external cohorts.
+        \item Applied various machine learning algorithms (SVM, Random Forest, Neural Networks) with cross-validation.
+    \end{itemize}
+
+    \textbf{Conclusion:} Machine learning approaches can effectively leverage complex biological data to provide accurate and personalized recurrence predictions for GBM patients.
+\end{literaturepaper}
+
+\bibliography{references} % Ensure 'references.bib' is in the same directory and contains the cited keys
+
+\end{document}
