@@ -1,0 +1,19 @@
+# config/pipeline_config.yaml
+
+# USe to define paths to input data, reference files, output directories, and whatnot 
+paths:
+  input_vcf: "data/input_vcfs/example_case1_Gemini_generated.vcf"
+  # phenotype_file_example: "data/phenotype_data/example_case1_phenotypes.txt"
+  # reference_list_dummy_gnomad: "data/reference_data/dummy_gnomad_subset.tsv"
+  output_dir: "results/current_run_output/" 
+
+# Settings for pipeline modules (for thresholds, model names, or other parameters that modules might need)
+settings:
+  module2_preprocessing:
+    min_qual_score: 20
+    # other QC parameters
+  module3_annotation:
+    # annotation specific settings
+  module5_ai_classification:
+    model_path: "models/placeholder_model.pkl"
+    prediction_threshold: 0.7
