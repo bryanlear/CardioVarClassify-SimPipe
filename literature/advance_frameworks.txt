@@ -1,0 +1,43 @@
+Incorporating Advanced Frameworks 
+
+1. Attention mechanism:
+
+	DNABERT and Nucleotide Transformer (LLMs) rely on attention mechanisms. Attentionn allows the model to dynamically weigh the importance of different parts of an input sequence (DNA seq., variant annotation, segments of biomedical literature) when making predictions or generating summaries.
+
+	Applications:
+		Integration of Multiple CLassification Sources: Attention may help LLM discern which data sources (ClinVar, gnomAD, CADD scores, polyphen-2, literature snippets) are most informative for a specific variant. it ''pays more attention'' to X features. 
+
+		Automated Variant Reporting: When LLM generates a report, attention mechanism can help it focus on and highlight most critical pieces of evidence supporting a classification, making the report more concise and useful.
+
+		Improving Pathogenicity Prediction: Enformer moel uses transformers to predict  gene expression, using attention to capture long-range interactions in DNA.  Could be applied to understanding the functional impact of variants. 
+
+		Explainable AI: VIsualizing attention weights can offer insights into why LLM made x classification showing which parts of the input data were most influential. 
+
+
+2. Game Theory:
+	
+	In scenarios with multiple conflicting information sources.
+
+	Applications:
+		Reconciling Conflicting Evidence: Different in-silico prediction tools (e.g., SIFT, PolyPhen-2, CADD) may provide contradictory predictions for the same variant --> Model tools as players, each with its own utility (e.g., based on its known accuracy for certain types of variants). LLM can learn strategy like finding a Nash equilibrium to aggregate conflicting signals. 
+
+		Data Fusion Strategies: When integrating data from gnomAD and ClinVar, if there are discrepancies (e.g., a variant common in gnomAD but listed as pathogenic in ClinVar for a rare disease), game theory principles may help define rules for resolving such conflicts based on the reliability or stakes associated with each source. 
+
+
+
+
+Title: "Discrete Choice Methods with Simulation"
+
+Author(s)/Editor(s): Train, K. E.
+Journal/Publisher: Cambridge University Press
+Year: 2009 (2nd Edition)
+Focus & Relevance: This book (and the field it represents) deals with modeling choices made by individuals (the "population") from a discrete set of alternatives (e.g., choosing a mode of transport, a brand of product).
+Choice Probabilities: The models estimate the probability of an individual choosing each alternative. These probabilities directly relate to the expected frequency of choices in a population.
+Logit and Probit Models: These are specific statistical models used to link individual characteristics and alternative attributes to choice probabilities.
+
+Title: "Income Distribution"
+
+Author(s)/Editor(s): Atkinson, A. B., & Bourguignon, F. (Eds. of the Handbook of Income Distribution, often individual chapters or earlier foundational works by Pareto, Gini, etc.)
+Focus & Relevance: This area of economics is fundamentally about the frequency distribution of income or wealth across a population.
+Pareto Distribution: Often used to model the distribution of wealth, where a small percentage of the population holds a large percentage of the wealth (describing the frequency of individuals at different high wealth levels).
+Lorenz Curves and Gini Coefficients: Mathematical tools to describe and quantify inequality in distributions (which are based on frequencies of income/wealth brackets).
