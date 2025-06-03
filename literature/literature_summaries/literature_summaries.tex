@@ -199,6 +199,47 @@
     \item Benign
 \end{itemize}
 A VUS is a variant for which there is insufficient or conflicting evidence to definitively classify it as either pathogenic or benign at the current time. More research or data is needed to clarify its role. \textit{Limited evidence for variants not observed in population databases can lead to an increased number of variants of uncertain significance in clinical genetic testing.} Thus, VUS describes current interpretation of a variant's effect on health.
+
+
+
+
+\textbf{Adjacency Matrix:} A, square matrix to represent a finite graph. If graph has $N$ nodes, its A will be $N * N$ matrix.
+
+\section*{Adjacency Matrix}
+
+An \textbf{adjacency matrix} $A$ of a graph $G = (V, E)$ with $N$ nodes, where $V = \{v_1, v_2, \ldots, v_N\}$ is the set of vertices and $E$ is the set of edges, is an $N \times N$ square matrix where its elements $A_{ij}$ are defined as follows:
+
+
+For an \textbf{unweighted graph}:
+$$
+A_{ij} = \begin{cases}
+1 & \text{if edge between node } i \text{ and node } j \\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+For a \textbf{weighted graph}:
+$$
+A_{ij} = \begin{cases}
+w_{ij} & \text{if edge between nodes } \text{ with weight } w_{ij} \\
+0 & \text{otherwise}*
+\end{cases}
+$$
+
+* $(\text{or sometimes } \infty \text{ depending on convention})$
+
+\subsection*{Properties:}
+
+\begin{itemize}
+    \item For an \textbf{undirected graph}, the adjacency matrix is symmetric: $A_{ij} = A_{ji}$ for all $i, j \in \{1, \ldots, N\}$.
+
+    \item In GCN, a modified adjacency matrix $\tilde{A}$ is often used, where self-loops are added to each node. This means diagonal elements of standard adjacency matrix $A$ are set to 1:
+    $$
+    \tilde{A}_{ii} = 1 \quad \text{for all } i \in \{1, \ldots, N\}
+    $$
+    and for $i \neq j$, $\tilde{A}_{ij} = A_{ij}$. This can also be expressed as $\tilde{A} = A + I$, where $I$ is the identity matrix.
+\end{itemize}
+
 \end{literaturepaper} 
 
 \begin{literaturepaper}{Next-Generation Sequencing \cite{gencore_how_sequencing_works}}
@@ -455,7 +496,7 @@ All pixels collectively form a dependence graph, where modeling dependencies is 
 
 Separability issues arise where certain regions where images from different digit categories may project into the same space. In \textbf{2D} one may struggle to discern physical meaning of dimensions. e.g., $Z_1$ may encode info about rotation which would be challenging to verify.
 
-\section{Generative Modeling with Latent Variables}\\
+\subsection*{Generative Modeling with Latent Variables}\\
 
 \textbf{Generative Process:} \textit{Derivation of Evidence Lower Bound (ELBO) for a latent variable model} (Variational Autoencoders (VAEs)).
 
@@ -504,10 +545,209 @@ $&\ge \int q_{\phi}(\mathbf{z}|\mathbf{x}) \log \frac{p_{\theta}(\mathbf{x}|\mat
 \includegraphics[width=7.3cm, height=1.6cm]{eg_3.png}\\
 
 
+\end{literaturepaper}
+
+\begin{literaturepaper}{Graph Embeddings:}
+\label{background-info-3}
+\small
+\textit{Low-D representation of objects.} \\
+
+\textbf{Disentanglement:} Individual dimensions (or simpler linear combinations of dimensions - e.g., directions) inn embedding space have learn to capture \textit{distinct. independent, and interpretable} factor of variation in original data. In an ideally disentangled space for faces, one latent dimension might control "smile intensity," another "head pose," another "presence of glasses," and another "gender appearance" and one could \textbf{ADJUST} by moving along corresponding latent direction without significantly affecting others.  
+
+Models like VAEs learn an \textbf{encoder} to map an input object to $Z$ in embedding space and a \textbf{decoder} to map point $Z$ from this space back to the original data format. \textit{Navigating} such space implies e.g., moving from point $Z_1$ to $Z_n$. Movement may be interpolation or complex path.\\
+
+Let $Z \in \Re^D$ be a point in $d$-dimensional latent space. \\
+
+\textbf{Semantic Vectors}
+\begin{itemize}
+    \item $z_{A,Neutral}$ latent representation Person A neutral expression
+    \item $z_{A,Smile}$ 
+    \itemn 'smile vector' for Person A $v_{A,smile} = z_{A,smile} - z_{A,neutral}$.
+\end{itemize}
+
+\textit{To preserve topology and similarity (distance between similar nodes).} \\
+
+\textbf{Targets:}
+\begin{itemize}
+    \item Improve original data (node classification, link prediction, anomaly detection).
+    \item Downstrean ML tasks (clasification/Regression/CLustering/K-NN $\rightarrow$ QA/dialog systems, translation, image segmentation.
+\end{itemize}
+
+\textbf{Translational Approaches:} For predicting missing links, model relationships as a translation operation in embedding space.
+
+\textit{Entities} (nodes) and relations are mapped  to low-D vectors. A scoring (to min. for true triplets and max. for false triplets) measures plausibility of a triplet $(h , r, t)$  based on how well translation $h + r \approx t$ holds. \\
+
+\textbf{Triplet:} Single piece of factual information or entity in relationship. e.g., $(head)$Amsterdam $(relation)$is\_capital\_of $(tail)$Nederland\\
+
+
+\textbf{TransE:}
+
+Let $h, r, t \in \Re^d$ be d-dimensional embeddings for head entity, relation, tail entity.
+
+\textbf{Scoring/Energy function:} $f_r(h,t) = ||h + r - t||_{L_1/L_2}$ Dissimilarity / distance. (L1 or L2 norm). e.g., lower score $=$ triplet $(h,r,t)$ is more likely to be \textbf{TRUE}.
+
+\textbf{Objective function (margin-based ranking loss):} Model is trained to min. margin-based ranking loss which ensures that \textit{TRUE} triplets have \textit{lower scores (higher plausibility)} than corrupted triplets.
+$$
+\mathcal{L} = \sum_{(h,r,t) \in S} \sum_{(h',r,t') \in S_{(h,r,t)}'} \left[ \gamma + f_r(h,t) - f_r(h',t') \right]_{+}
+$$
+$S$ is set of TRUE triplets (observed), $S'_{(h,r,t)}$ is set corrupted triplets, $\gamma > 0$ is margin hyperparameter, ${x}_+ = max(0,x)$ is \textbf{hinge loss} $\rightarrow$  ''ensure that true triplets have more favorable score (in TransE, a lower dissimilarity score from $f_r(h,t)$ than corrupted or "negative" triplets by at least a certain margin $\gamma$''\\
+
+\textit{(Loss function)} To address corruption in negative triplets, remove either tail or head of an edge and replace it with another randomly. (Maximizing distance of negative triplets).
+
+Hinge loss incorporates scoring function to evaluate individual instances (TRUE vs Corrupted triplets) and defines how model should be penalized based on scores.
+
+Relies on positive information $\rightarrow$ over-optimization. THUS, \textit{Min. distance $+$ penalize when incorrect triplets are in close proximity.}\\
+
+Briefly, TransE learns vector representation (embeddings) to capture relationship geometrically in embedding space. Optimization goal is to align $h$, $edge$, $tail$ so minimize distance between sum of embeddings of positive triplet for all edges in knowledge graph and minimize negative triplets. \\
+
+\textbf{Tensor Factorization:} (not good for downstream machine learning tasks) Knowledge graph as multi-dimensional tensor. An entry in tensor $X_{hrt}$ $\rightarrow$ existence/truthfulness of triplet. \\
+
+\includegraphics[width=7cm, height=3cm]{factorization.png}\\
+
+\textbf{Algorithm examples:}\\
+
+\textbf{RESCAL (Resource Description Framework Schema)}:
+Let $h, t \in \Re^d$ be entity embeddings and $r$ (matrix \textbf{$M_r \in \Re^{d * d}$}) be relation embeddings/parameters.
+\textit{r} (relation), \textit{Scoring function} = $f(h,r,t) = h^TM_rt$. Equivalent to factorizing a 3D tensor $X$ where $X_{ijk} \approx e^T_iM_ke_j$ if $i,j$ are entities and $k$ is relation.\\
+
+\textbf{DistMult:} Simplifies RASCAL by restricting $M_r$, to be a \textit{diagonal matrix} represented by vector \textbf{r} $\in \Re^d$. \textit{Scoring function:} $$
+f(h,r,t) = \mathbf{h}^{\mathsf{T}} \text{diag}(\mathbf{r}) \mathbf{t} = \sum_{k=1}^{d} h_k r_k t_k
+$$
+\textit{Model is effective but can only model symmetric relations.}\\
+
+\textbf{ComplEx:} Uses complex-valued embeddings: $(h,r,t \in C^d$. \textit{Scoring function:} $f(h,r,t) = Re(h^T diag(r)\hat{t}$ where $\hat{t}$ is complex conjugate of $t$. \textit{Allows to model asymmetric relations}.\\
+
+\textbf{Random Walk-based:} Learn node embeddings by capturing notion of neighborhood similarity. Nodes that frequently co-occur on short random walks = similar and should have similar vector representation. (word2vec ((Skip-gram, CBOW))).
+
+\begin{itemize}
+    \item Generate large number of random walks from each node in graph. Walks = Sentences / sequence of nodes.
+    \item Use sequences as input to a Skip-gram model (or similar) to learn node embeddings of given target node. 
+\end{itemize}
+
+\subsection*{Layer-wise propagation rule for GCN} Reformulated to highlight its operation in terms of sparse matrix multiplications.
+
+\textit{Update rule:}
+$$
+\mathbf{H}^{(l+1)} = \sigma \left(\tilde{\mathbf{D}}^{-\frac{1}{2}} \tilde{\mathbf{A}} \tilde{\mathbf{D}}^{-\frac{1}{2}} \mathbf{H}^{(l)} \mathbf{W}^{(l)} \right)
+$$
+
+\begin{itemize}
+    \item $\mathbf{H}^{(l)}$ is the l-th layer in the unrolled network (the l-th time-step)
+    \item $\mathbf{A}$ is the adjacency matrix, $\tilde{\mathbf{A}}$ is the same with also the diagonal set to 1
+    \item $\tilde{D}_{ii} = \sum_j \tilde{A}_{ij} \quad \rightarrow \quad \text{Used for normalization}$
+    \item $\mathbf{W}^{(l)}$ is a learnable weight matrix for layer l
+\end{itemize}\\
+
+Each element $\hat{D}_{ii}$ is \textbf{degree of node} (number of edges connected to it) $i$ on the graph represented by $\hat{A}$. Since $\hat{A}$ include self-loops (symmetric for undirected loops), $\hat{D}_{ii}$ is calculated as sum of entries in $i-th$ row (or $i-th$ column):\\
+
+$\tilde{D_{ii}} = \sum_j\tilde{A_{ij}}}$\\
+
+$\tilde{\mathbf{D}}^{-\frac{1}{2}} \tilde{\mathbf{A}} \tilde{\mathbf{D}}^{-\frac{1}{2}}$ Represents specific form of \textbf{symmetric normalization} of $\tilde{A}$.
+
+Such normalization is crucial for:
+\begin{itemize}
+    \item Averaging neighbor features (avoid scale issues) prevents aggregated feature vectors - with high-degree - having $>>>$ magnitudes than those of low-degree
+    \item Controlling variance and stabilizing learning (keeping scale consistent)
+    \item Preventing dominance by high-degree nodes
+\end{itemize}
+
+\subsection*{Some info on Laplacian:}
+
+In \textit{spectral graph theory}, several different types \textbf{Laplacian matrices} available.\\
+
+\textbf{Unnormalized graph Laplacian}
+$$
+L^u = D - A
+$$
+
+\textbf{Symmetric normalized graph Laplacian}
+$$
+L^s = I - D^{-1/2}AD^{-1/2}
+$$
+
+$L^s$ is symmetric matrix, i.e. $L^s_{ij} = L^s_{ji}$. proof it is its own transpose:
+\begin{align*}
+(L^s)^{\mathsf{T}} &= \left(I - D^{-1/2}AD^{-1/2}\right)^{\mathsf{T}} \\
+&= I^{\mathsf{T}} - \left(D^{-1/2}AD^{-1/2}\right)^{\mathsf{T}} \\
+&= I - \left(D^{-1/2}\right)^{\mathsf{T}} \mathbf{A}^{\mathsf{T}} \left(D^{-1/2}\right)^{\mathsf{T}} \\
+&= I - D^{-1/2} \mathbf{A} D^{-1/2} \\
+&= L^s.
+\end{align*}
+
+$L^s = D^{-1/2} L^u D^{-1/2}$, \textbf{because:}
+\begin{align*}
+L^s &= I - D^{-1/2}AD^{-1/2} \\
+    &= D^{-1/2} DD^{-1/2} - D^{-1/2} AD^{-1/2} \\
+    &= D^{-1/2} (D - A) D^{-1/2} \\
+    &= D^{-1/2} L^u D^{-1/2}
+\end{align*}
+
+Transformation of multiplying $D^{-1/2}$ from left and from right ensures all rows and columns in adjacency matrix $\tilde{A}$ that involve a high-degree node $x$, say $\text{deg}(x) = d$, $d \gg 1$, get divided by a "small" number $\frac{1}{\sqrt{d}}$.\\
+
+In matrix multiplication form, the R-GCN is computed as follows:
+$$
+\mathbf{h}_i^{(l+1)} = \sigma \left( \sum_{r \in \mathcal{R}} \sum_{j \in \mathcal{N}_i^r} \frac{1}{c_{i,r}} \mathbf{W}_r^{(l)} \mathbf{h}_j^{(l)} + \mathbf{W}_0^{(l)} \mathbf{h}_i^{(l)} \right)
+$$
+
+\begin{itemize}[leftmargin=*,noitemsep,topsep=0pt] % Adjust spacing if needed
+    \item $\mathbf{h}_j^{(l)}$: \textbf{Feature vector (or embedding)} of neighboring node $j$ of node $i$ (connected by relation $r$) from\textit{previous layer} $l$.
+
+    \item $\mathbf{h}_i^{(l)}$: \textbf{Feature vector of the node $i$ itself} (the node being updated) from the \textit{previous layer} $l$.
+
+    \item $\mathbf{W}_r^{(l)}$: Learnable weight matrix specific to \textbf{relation type $r$} at layer $l$. It transforms the features of the neighboring nodes $\mathbf{h}_j^{(l)}$.
+
+    \item $\mathbf{W}_0^{(l)}$: Learnable weight matrix for the \textbf{self-connection} of node $i$ at layer $l$. It transforms the features of the node $i$ itself, $\mathbf{h}_i^{(l)}$.
+
+    \item $\mathbf{W}_r^{(l)} \mathbf{h}_j^{(l)}$: Represents the \textbf{"message"} passed from neighbor $j$ to node $i$ along \textbf{relation $r$}. It's the transformed feature vector of the neighbor.
+
+    \item $\mathbf{W}_0^{(l)} \mathbf{h}_i^{(l)}$: Represents the \textbf{"message"} from node $i$ to itself (or the transformed self-features).
+
+    \item The sums $\sum_{r \in \mathcal{R}} \sum_{j \in \mathcal{N}_i^r}$ indicate that messages from all neighbors under all relation types are aggregated (summed after normalization by $1/c_{i,r}$).
+
+    \item $\mathbf{h}_i^{(l+1)}$ is new feature vector for node $i$ at the next layer $l+1$, after applying an activation function $\sigma$ to the sum of aggregated neighbor messages and the self-message.
+\end{itemize}
+
+For an edge from node $j$ to node $i$ (with edge type $r$ and potentially edge features $\mathbf{e}_{ji}$), the message $\mathbf{m}_{ji}^{(l)}$ might be:
+$$
+\mathbf{m}_{ji}^{(l)} = \text{MLP}_r(\mathbf{h}_j^{(l)}, \mathbf{h}_i^{(l)}, \mathbf{e}_{ji})
+$$
 
 \end{literaturepaper}
 
+\begin{literaturepaper}{Background info 2}
+\label{background-info-4}
+\small
+\subsection*{Ancestry Stratification:} Significant confounding factor. 
+Pipline should incorporate ancestry information to adjust filtering thresholds, select appropriate inference data highlight when variant's interpretations in sensitive to acenstry. \\
 
+\textbf{Accurate Allele Frequency:} Genetic variants can substantially differ across ancestral population.\\
+
+\textbf{gnomAD} provides ancestry-specific allele frequencies (European, African, East Asian,...). Linking variants to database using appropriate ancenstry-specific allele frequency is crucial for determining if $x$ variant is $truely$ rare in patient's ancestral group.  (What about individuals with a significant admixture from multiple ancestral populations?). (\textbf{$\neg$see} PM2, BA1, BS1 - ACMG/AMP guidelines).\\
+
+\textbf{Better interpretation VUS:} Individuals from non-EUR ancestry = more likely to receive VUS results because population = underrepresented in databases. 
+
+Better representation and ability to stratify by more granular ancestries can help resolve some VUS by providing more accurate background variation data for specific populations.  $\rightarrow$ Pipeline should weigh evidence differently/seek out ancestry-specific information when available.\\
+
+\textbf{Context for pathogenic variants:} Some variants may have higher prevalence in specific populations due to \textit{founder effects or bottlenecks}. $\rightarrow$ Automated variant reporting can include notes on population-specific prevalence if a known pathogenic variant is identified. \\
+
+\textbf{ML/DL Models} to multi-ethnic PRS (polygenic risk scores) development. PRS show variable performance across different ethnicities. Model will need to evaluated for performance across different ancestries. $\rightarrow$ Stratifying training/validation data by ancestry or using techniques to build ancestry-aware models can lead to more robust tools.  
+
+\textit{\textcolor{blue}{Prompt users for patient ancestry or integrate tools for genetic ancestry inference for interpretation.}}      
+\subsection*{Strategies:}
+
+\begin{itemize}
+    \item \textbf{Data Input:} Allow users of platform to specify patient's self-reported ancestry or integrate tools that can infer genetic ancestry from variant data (e.g., AIMs or PCA-based methods (aided by LLM?)).
+    \item \textbf{Database Queries:} When linking to gnomAD ensure retrieval and use of ancestry-specific allele frequencies.
+    \item \textbf{LLM Training/Fine-tuning:} Ensure training data includes diverse ancestries and considers ancestry-specific interpretations if available.
+    \item \textbf{Reporting:} Should clearly state which ancestral population data was used for frequency assessment and highlight any implications.
+    \item \textbf{Model Evaluation:} Test performance of classification pipeline across different ancestral groups to identify/mitigate potential biases.
+    \end{itemize}
+
+    For individuals substantially mixed, \textit{model must handle uncertainty or be provided with more nuanced ancestry information to make better-informed classifications.} \textbf{ADMIXTURE, RFMix, or PCA-based approaches} to estimate individual's proportional ancestry from different global populations.  Pipeline could accept proportions as inputs and weigh them for example. (see \textbf{LAI} computationally more expensive, though).
+                 
+\end{literaturepaper}
 \bibliography{references} % Link to your .bib file
 
 \end{document}
+
+
