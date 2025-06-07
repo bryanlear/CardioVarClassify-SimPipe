@@ -746,6 +746,284 @@ Better representation and ability to stratify by more granular ancestries can he
     For individuals substantially mixed, \textit{model must handle uncertainty or be provided with more nuanced ancestry information to make better-informed classifications.} \textbf{ADMIXTURE, RFMix, or PCA-based approaches} to estimate individual's proportional ancestry from different global populations.  Pipeline could accept proportions as inputs and weigh them for example. (see \textbf{LAI} computationally more expensive, though).
                  
 \end{literaturepaper}
+
+\begin{literaturepaper}{Performance of deep-learning-based approaches to improve polygenic scores \cite{Kelemen2025PolygenicScores}}
+\label{paper-summary-3}
+\small
+\subsection*{Background info:} 
+\textbf{Risk Allele:} For a SNP, there are typically 2 possible alleles (variants). These alleles may be found to be associated with an increased risk of a disease or a higher value of a quantitative trait. \\
+
+\textbf{Genotype Encoding (0,1,2):} Numerical encoding of an individual's genotype at a specific SNP locus, based in the count of the risk allele. \textbf{\textit{Additive Model.}}\\
+
+Let us assume for a given SNP, 2 possible alleles are $A$ and $G$. Through GWAS it was determined that $G$ is the risk allele. The genotype $G_i$ for an individual at SNP $i$ is encoded as the number of $G$ allele the possess.
+
+\begin{itemize}
+    \item $G_i = 0$ $\rightarrow$ Homozygous for non risk
+    \item $G_i =1$ $\rightarrow$ Heterozygous 
+    \item $G_i = 2$ $\rightarrow$ Homozygous for risk
+\end{itemize}
+
+Most common encoding used in GWAS and PGS because it assume a \textbf{linear, additive effect}. \\
+
+\textbf{GWAS:} Approach used to identify associations between genetic variants (specifically SNPs) and a particular trait or disease. It involves scanning the genomes of many individuals to see which variants are statistically associated with the trait.
+
+\textit{Input data:} $N*M$ matrix where $N =$ number individuals, $M =$ number SNPs. $m_{ij} = \{0,1,2\}$ for $x_i$ at a SNP.
+
+\textit{Phenotype data:} A vector of length $N$ containing the trait measirement for $x_i$.
+
+\textit{Covariate data:} An $N*K$ matrix where $K$ is number of covariates (e.g., age, sex, PCA for ancestry) to control for confounding effects.
+
+\textbf{GWAS - Statistical Model:} Proceeds by performing a separate statistical test for each of the $M$ SNPs. For each SNP $i$, a regression model is fitted to test association between genotype $G_i$ and phenotype $Y$\\
+
+\textit{For Quantitative traits:}\\
+
+$Y = \beta_0+\beta_i G_i + \Sigma^K_{k=1}\gamma_k C_k + \epsilon$\\
+
+Where:
+\begin{itemize}
+    \item $\beta_i$ is the \textbf{effect size} or \textbf{weight} for SNP $i$. This is the primary value of interest representing average change in trait $Y$ for each additional copy of the risk allele
+    \item $C_k$ are the $K$ covariates
+    \item $\gamma_k$ are effect sizes for the covariates
+    \item $\beta_0$ intercept.
+    \item $\epsilon$ assumed to be normally distributed, $\epsilon \sim N(0, \sigma^2)$
+\end{itemize}
+
+\textit{For Binary traits:} Model for a single SNP $i$ is:
+\[
+\text{logit}(P(Y=1)) = \ln\left( \frac{P(Y=1)}{1 - P(Y=1)} \right) =\] 
+\[
+\beta_0 + \beta_i G_i + \sum_{k=1}^{K} \gamma_k C_k
+\]
+Where:
+\begin{itemize}
+    \item $Y=1$ for cases and $Y=0$ for controls
+    \item $P(Y=1)$ is probability of an individual being a case
+    \item Left side is \textbf{logarithm of the odds} (logit) of having the disease
+    \item $\beta_i$ is \textbf{log-odds ratio} for SNP $i$. Represents the change in the log-odds of having the disease for each additional copy of the risk allele. The odds ratio (OR) is calculated as $e^{\beta_i}$.
+\end{itemize}
+In both cases, the GWAS calculation involves fitting the appropriate model for millions of SNPs, each time estimating the effect size ($\beta_i$) and a p-value for the association.
+
+\textit{Weights:} ($w_i$) used to build a Polygenic Score (PGS) are the \textbf{effect sizes ($\beta_i$)} estimated from the GWAS regression models.
+
+\begin{itemize}
+    \item For a PGS predicting a quantitative trait, the weight $w_i$ for SNP $i$ is the $\beta_i$ value obtained from the linear regression.
+    \item For a PGS predicting disease risk, the weight $w_i$ for SNP $i$ is the $\beta_i$ value (the log-odds ratio) obtained from the logistic regression.
+\end{itemize}
+These weights are taken from the summary statistics of a large "discovery" GWAS and represent the estimated independent contribution of each SNP to the trait or disease.\\
+
+\textbf{Polygenic score (PGS or PRS):} Single value that estimates an individual's genetic predisposition for a specific trait or disease. It aggregates the effects of many genetic variants (SNPs typically) from across the genome into scores.
+
+\[PGS = \Sigma^M_{i=1}w_i * G_i$ \text{where M} = \text{Total number variants included in score}\]
+$w_i =$ effect size of variant $i$ (from GWAS summary statistics).
+
+$G_i =$ # risk alleles $(0,1,2)$ an individual has for variant $i$. 
+
+\begin{itemize}
+    \item \textbf{Purpose/application}: Risk stratification. Helps identify individuals within a population who have a higher or lower genetic susceptibility to complex diseases like coronary artery disease, type 2 diabetes, breast cancer.
+    \item PGS are influenced by many genes, each with a small effect, rather than single gene disorders. They are a \textit{probabilistic} measure that interacts with environmental and lifestyle factors. 
+    \item The accuracy of a PGS is often highest in individuals of the same ancestry as the population used for the initial GWAS from which the weights were derived.
+\end{itemize}
+
+\subsection*{Kelemen et al.}
+
+Simpler additive models calculate the score by just summing up the effects of individual genetic variants, assuming each one of them adds its own effect independently. 
+
+e.g.,
+\[PGS_{additive}=\Sigma^M_{i+1}w_iG_i\]
+\textbf{Functional Epistasis:} Refers to how genes and their protein products physically/biochemically interact in pathways.\\
+\textbf{Statistical Epistasis:} The combined effect of $2$ or more genes on a trait is different than just adding up their individual effects.
+
+For an additive model for a phenotype $Y$ based on $2$ SNPs, $G_A$ and $G_B$:
+\[ Y = \beta_0 + \beta_A G_A + \beta_BG_B + \epsilon \]
+
+if an interaction term is statistically significant:
+\[ Y = \beta_0 + \beta_A G_A + \beta_BG_B +  \beta_{AB}G_AG_B +\epsilon\]
+Statistical epistasis can also be caused by technical artifacts.\\
+
+\textbf{Biology}: We would conclude we've found biology if the non-linearity the NN learned corresponds to a $TRUE$ biological interaction between the products of different genes (i.e., functional epistasis leading to statistical epistasis).\\
+
+\textbf{Artifact:} It's considered an artifact if the non-linearity is simply a clever statistical trick the model learns to compensate for incomplete data without reflecting a real biological interaction.\\
+
+
+\textbf{Linkage Disequilibrium (LD):} Genetic variants that are physically close to each other on a chromosome are often inherited together, as there is a lower chance of a recombination even occurring between them. LD is the non-random association of alleles at different loci. May be quantified with e.g., $r^2$.\\
+
+\textbf{Causal variant:} Specific DNA change that directly influences a biological process and thus the phenotype\\
+
+\textbf{Tag SNP} is a variant that is measured in a study (e.g., on a genotyping array) that does not have a direct biological effect itself but is in high LD (highly correlated) with a nearby causal variant that might not have been measured. 
+
+Because tag SNP and the causal variant are almost always inherited together, a statistical association found for the tag SNP is actually acting as a \textit{proxy or tag} for the effect of the true causal variant. Thus \textbf{tag} $=$ \textit{'to serve as a proxy'}.\\
+
+\textbf{Joint Tagging Effects:} LD can create artifacts that mimic statistical epistasis.\\
+
+\includegraphics[width = 6cm, height = 3cm]{joint_taggging.png}\\
+
+\textit{A model might find that the combination SNP$1$ and SNP$2$  predicts the phenotype better than either alone, not because of a biological interaction between them but because together they form a better proxy/tag for the true causal variant SNP3.}\\
+
+Testing ability NN to capture non-linear effects in PGS generation while controlling for confounding by Linkage Disequilibrium (LD).
+
+\textbf{Data and Cohort:}
+\begin{itemize}
+    \item \textbf{Cohort:} Filtered to 125,000 unrelated individuals of European ancestry
+    \item \textbf{SNP Set:} Filtered to 1,188,672 HapMap3 SNPs with MAF $> 0.001$ and high imputation quality (INFO $> 0.9$)
+    \item \textbf{Data Split:} Cohort was split into training, validation, and test sets in 6:2:2 ratio
+    \item \textbf{Phenotypes:} 28 real traits were selected from the PGS Catalog, along with simulated phenotypes
+\end{itemize}
+
+The phenotype $Y$ is assumed to arise from the model:
+\[
+Y = G + E + G' \times E' + G' \times G' + E' \times E' + \epsilon
+\]
+where $G$ and $E$ are additive genetic and environmental components, $G' \times G'$ and $G' \times E'$ represent gene-gene and gene-environment interactions, and $\epsilon$ is noise.
+
+\textbf{Architecture:}
+\begin{itemize}
+    \item \textbf{Type:} MLPs with $3$ fully-connected hidden layers, implemented in PyTorch
+    \item \textbf{Configurations:} $2$ model sizes were tested $*$ phenotype$^{-1}$: Large model (100, 50, 25 neurons) and Small model (24, 12, 6 neurons)
+    \item \textbf{Hyperparameters:} Batch size 32, dropout 0.3, learning rate 0.001, batch normalization, and Softplus activation function
+\end{itemize}
+
+Study's method for quantifying nonlinear effects $\rightarrow$ comparing nonlinear NN with its linear counterpart.
+\begin{itemize}
+    \item \textbf{Nonlinear NN Model:} Standard MLP where output is  nested series of nonlinear activation functions $\sigma(\cdot)$:
+    \[ Y = \sigma_k(\dots\sigma_2(\sigma_1(XW_1)W_2)\dots W_k) \]
+    \item \textbf{Linear NN Model:} Same architecture but with all activation functions $\sigma(\cdot)$ removed. Model collapses into a single linear transformation:
+    \[ Y = (XW_1W_2\dots W_k) = XW_{\text{all}} \]
+    Difference in performance ($R^2$) between models, trained from scratch, was used to estimate the amount of nonlinearity learned by the nonlinear model
+\end{itemize}
+
+\textbf{Controlling for Joint Tagging Effects (LD Confounding):}
+$2$ strategies were tested to mitigate confounding by LD:
+\begin{enumerate}
+    \item \textbf{SNP-dosage weighting:} Multiplying input SNP allele dosages $[0,1,2]$ by their per-SNP weights from a pre-computed, LD-aware PGS (e.g., from PRS-CS). This provides model with \textit{LD-adjusted additive} information upfront
+    \item \textbf{LD-clumping + distance filtering:} A brute-force method to aggressively remove LD by keeping only $1$ SNP $*$ locus$^{-1}$ and ensuring no $2$ variants are closer than $500kb$. This is primarily used as reference to demonstrate the effect of removing LD entirely
+\end{enumerate}
+
+The key idea is that a single, true causal variant is often not directly measured in the data. Instead, several nearby genotyped SNPs which are correlated with the casual variant due to LD act as imperfect proxies for it.\\
+
+\textit{The simple additive model} sees effect of each tag SNP individually. If each tag is only weakly correlated with the true causal variant, the additive model struggles to capture the full effect of that casual variant. The NN, on the other hand, creates a more accurate complete structure/composite tag that better approximates the state the unobserved (true) causal variant. \\
+
+\textit{epistasis: deviation from additivity in a statistical model}. Thus, when a NN learns a non-linear function of multiple tag SNPs to better predict a \textit{single hidden additive effect}, the resulting model is non-additive w.r.t. observed tag SNP.
+
+
+\begin{enumerate}
+    \item \textbf{True (but hidden biology):} Consider an single, unmeasured causal $SNP(SNP_3)$ has a simple, additive effect on phenotype $Y$.
+    \item \textbf{Observed (incomplete) data:} Available $SNPs = SNP_1, SNP_2$. Each is imperfectly correlated with $SNP_3$ due to LD, thus neither is perfect proxies for $true$ causal signal.
+\end{enumerate}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+\subsection*{Example finding epistasis (gene-gene interaction)}:
+
+\textbf{Setup:}
+
+\textbf{Goal:} T determine if effect of one genetic variant (SNP A) on a disease depends on the genotype of another variant (SNP B).
+
+\begin{description}
+    \item[Phenotype ($Y$):] Cardiovascular disease, coded as binary trait where $Y=1$ for cases and $Y=0$ for controls
+    \item[Genetic Data ($G_A, G_B$):] Gnotype data for $2$ SNPs $=$ $\{SNP_A, SNP_B\}$
+    \item[Genotype Encoding:] Additive model. Genotype is encoded as count of risk allele $(0, 1, 2)$
+\end{description}
+
+\textbf{Mathematical Approach: Comparing Models:}
+Fit $2$ logistic regression models to data. The first assumes no interaction while second includes an \textit{interaction term}. Evidence for epistasis is found if the second model provides a significantly better fit to the data.
+
+\textbf{Additive Model ($H_0$):}
+Model the phenotype assuming each SNP contributes to the risk independently. This model tests the \textbf{additive effects} only
+The mathematical formulation for log-odds of having the disease is:
+\[
+\log\left( \frac{P(Y=1)}{1 - P(Y=1)} \right) = \beta_0 + \beta_A G_A + \beta_B G_B
+\]
+$\beta_A$ and $\beta_B$ are independent effects of SNP A and SNP B.
+
+\textbf{Interaction Model ($H_1$)}
+Build a model that tests for epistasis by including an interaction term ($G_A \times G_B$). \textit{ "Deviation from additivity in a statistical model"}
+\[
+\log\left( \frac{P(Y=1)}{1 - P(Y=1)} \right) = \beta_0 + \beta_A G_A + \beta_B G_B + \beta_{AB} G_A G_B
+\]
+The coefficient $\beta_{AB}$ is key. If $\beta_{AB}$ is significantly different from $0$ it provides evidence for statistical epistasis. The total effect of SNP A on the log-odds is now $(\beta_A + \beta$_{AB} G_B)$, which explicitly depends on the genotype of SNP B.
+
+\textbf{Statistical Test}
+
+Fit the interaction model and test the significance of the interaction coefficient, $\beta_{AB}$
+
+\begin{itemize}
+    \item \textbf{$H_0$:} There is no interaction ($\beta_{AB} = 0$).
+    \item \textbf{$H_1$:} There is an interaction ($\beta_{AB} \neq 0$).
+\end{itemize}
+
+Reject $H_0$
+
+\subsection*{Numerical Example}
+
+Consider data for 10 individuals. Note: Cases only appear when an individual has risk alleles at \textit{both} SNPs.
+
+\begin{table}[h!]
+\centering
+\caption{Hypothetical Data for Epistasis Analysis}
+\begin{tabular}{cccc}
+\toprule
+\textbf{Individual} & \textbf{Phenotype (Y)} & \textbf{Genotype SNP A ($G_A$)} & \textbf{Genotype SNP B ($G_B$)} \\
+\midrule
+1 & 0 (Control) & 0 & 0 \\
+2 & 0 (Control) & 1 & 0 \\
+3 & 0 (Control) & 2 & 0 \\
+4 & 0 (Control) & 0 & 1 \\
+5 & 0 (Control) & 0 & 2 \\
+6 & 1 (Case) & 1 & 1 \\
+7 & 1 (Case) & 2 & 1 \\
+8 & 1 (Case) & 1 & 2 \\
+9 & 1 (Case) & 2 & 2 \\
+10 & 0 (Control) & 1 & 0 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Hypothetical Regression Results}:
+After fitting the interaction model from Step $2$ to this data, a stats package might produce the following results:
+
+\begin{table}[h!]
+\centering
+\caption{Hypothetical Logistic Regression Output for the Interaction Model}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Term} & \textbf{Coefficient ($\hat{\beta}$)} & \textbf{Standard Error} & \textbf{p-value} \\
+\midrule
+Intercept ($\beta_0$) & -5.0 & 2.0 & 0.012 \\
+$G_A$ ($\beta_A$) & 0.1 & 0.8 & 0.90 \\
+$G_B$ ($\beta_B$) & 0.2 & 0.9 & 0.82 \\
+\textbf{$G_A \times G_B$ ($\beta_{AB}$)} & \textbf{4.5} & \textbf{1.2} & \textbf{0.0002} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Interpretation}
+\begin{itemize}
+    \item Since p-values for individual coefficients, $\beta_A$ and $\beta_B$, are $(0.90, 0.82)$. Thus in an additive model neither SNP appears to have a significant effect on the disease by itself.
+    \item The p-value for the interaction coefficient, $\beta_{AB}$, is $(0.0002)$. Reject $H_0$ and conclude that a significant interaction effect exists.
+    \item Positive coefficient for $\beta_{AB}$ suggests that the risk of disease increases dramatically only when an individual carries risk alleles at \textit{both} loci simultaneously.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\textbf{Results:}
+\begin{itemize}
+    \item \textbf{Simulation Results:}
+    \begin{itemize}
+        \item In scenarios with genuine epistatic interactions, non-linear NNs outperformed linear NNs (e.g.,mean change in $R^2 = +10.9\%$)
+        \item Nonlinear NNs also outperformed linear NNs in additive scenarios ($R^2 = +3.7\%$) suggesting NNs can \textbf{exploit LD} to better model additive effects and can be mistakenly interpreted as evidence for epistasis 
+        \item SNP-dosage weighting strategy mitigated this confounding, reducing performance gap between nonlinear and linear NNs in additive scenarios with joint tagging effects from $+1.6\%$ to  $+0.2\%$
+    \end{itemize}
+    \item \textbf{Real Data Results ($28$ $UKB$ Phenotypes)}:
+    \begin{itemize}
+        \item When applied to real traits nonlinear NNs showed modest performance gain vs. linear NN (e.g., median change in $R^2$ of $+6.86\%$ for SNP-only models), suggesting true contribution of non-additive effects to phenotypic variance is limited
+        \item \textbf{Key Finding:} Linear and nonlinear NN models were \textbf{outperformed} by simpler baseline additive models (i.e., standard LD-aware PGS from PGS Catalog). NN models achieved only $\sim93\%$ to $\sim95\%$ of predictive accuracy of baseline linear models 
+    \end{itemize}
+\end{itemize}
+
+\textbf{While DL has potential, current application for improving PGS prediction is limited}. The performance gains of nonlinear NNs are often confounded by LD \textit{(joint tagging effects)} and after accounting for it the contribution of $TRUE$ non-additive effects is too small to make NNs outperform state-of-the-art additive PGS models. \textit{Results indicate NNs do not improve PGS with current data scales/methodologies.}
+
+\end{literaturepaper}
+
 \bibliography{references} % Link to your .bib file
 
 \end{document}
